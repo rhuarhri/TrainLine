@@ -64,7 +64,6 @@ class Online {
 
     suspend fun getTimeTable(stationName: String = "SHF", date : String, time : String) : List<All> {
         val url = BASE_URL + "train/station/" + stationName + "/" + date + "/" + time + "/"
-        println("url is $url")
         val retrofitInterface = setupRetrofit(url).create(OnlineInterface::class.java)
         val timeTable = retrofitInterface.getTimeTable().await()
 
