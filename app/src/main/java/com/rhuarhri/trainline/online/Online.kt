@@ -12,10 +12,17 @@ class Online {
 
     private val BASE_URL = "http://transportapi.com/v3/uk/"
 
-    private val retrofit = Retrofit.Builder()
+    /*private val retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl(BASE_URL)
-        .build()
+        .build()*/
+
+    private fun setupRetrofit(url: String) : Retrofit {
+        return Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(url)
+            .build()
+    }
 
     /*companion object {
         val BASE_URL = "http://transportapi.com/v3/uk/"
@@ -40,12 +47,30 @@ class Online {
         println("names ${name.operator_name}")
     }*/
 
-    suspend fun getTimeTable() : List<All> {
+    /*suspend fun getTimeTable() : List<All> {
         val retroInterface = retrofit.create(OnlineInterface::class.java)
         val timeTable = retroInterface.get().await()
 
         if (timeTable.departures != null) {
             if (timeTable.departures.all != null) {
+                return timeTable.departures.all
+            } else {
+                return listOf<All>()
+            }
+        } else {
+            return listOf<All>()
+        }
+    }*/
+
+    suspend fun getTimeTable(stationName: String = "SHF", date : String, time : String) : List<All> {
+        val url = BASE_URL + "train/station/" + stationName + "/" + date + "/" + time + "/"
+        println("url is $url")
+        val retrofitInterface = setupRetrofit(url).create(OnlineInterface::class.java)
+        val timeTable = retrofitInterface.getTimeTable().await()
+
+        if (timeTable.departures != null) {
+            if (timeTable.departures.all != null) {
+                println("raw data ${timeTable.departures.all.size}")
                 return timeTable.departures.all
             } else {
                 return listOf<All>()
@@ -59,7 +84,10 @@ class Online {
 
 interface OnlineInterface {
 
-    @GET("train/station/SHF///timetable.json?app_id=c9ef48df&app_key=f7dc9efc73b6cd485d10835de81c6ed6&train_status=passenger")
-    fun get() : Call<TimeTable>
+    /*@GET("train/station/SHF///timetable.json?app_id=c9ef48df&app_key=f7dc9efc73b6cd485d10835de81c6ed6&train_status=passenger")
+    fun get() : Call<TimeTable>*/
+
+    @GET("timetable.json?app_id=c9ef48df&app_key=f7dc9efc73b6cd485d10835de81c6ed6&train_status=passenger")
+    fun getTimeTable() : Call<TimeTable>
 
 }

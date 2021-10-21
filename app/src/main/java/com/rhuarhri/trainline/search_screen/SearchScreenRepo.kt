@@ -6,10 +6,10 @@ import com.rhuarhri.trainline.online.time_table_data.All
 
 class SearchScreenRepo {
 
-    private val online = Online()
+    //private val online = Online()
 
 
-    suspend fun getTrainList() : List<All> {
+    /*suspend fun getTrainList() : List<All> {
         return online.getTimeTable()
-    }
+    }*/
 }

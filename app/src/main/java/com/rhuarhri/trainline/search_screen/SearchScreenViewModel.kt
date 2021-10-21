@@ -27,13 +27,13 @@ class SearchScreenViewModel : ViewModel() {
 
     fun setup() {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = repo.getTrainList()
+            //val result = repo.getTrainList()
 
-            println("result size is ${result.size}")
+            //println("result size is ${result.size}")
 
-            withContext(Dispatchers.Main) {
+            /*withContext(Dispatchers.Main) {
                 updateTable(result)
-            }
+            }*/
         }
 
         //val result = runBlocking { repo.getTrainList() }
