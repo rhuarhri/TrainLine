@@ -37,22 +37,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TrainLineTheme {
-
-
-                val topBar = TopAppBar(
-                    title = {
-                        Text(
-                            text = "Train Time Table",
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            searchWidgetViewModel.show()
-                        }) {
-                            Icon(Icons.Filled.Search, "")
-                        }
-                    },
-                )
                 
                 Scaffold(topBar = {TopAppBar(
                     title = {
@@ -73,8 +57,6 @@ class MainActivity : ComponentActivity() {
                         TimeTableWidget().widget(state = timetableWidgetViewModel.state)
                     } )
 
-
-                
 
                 SearchWidget().widget(this, searchWidgetViewModel, onSearch = {
                     //If I used only one view model then the code below would not be necessary

@@ -139,7 +139,7 @@ class SearchWidgetViewModel : ViewModel() {
     keep the code separate from everything else
      */
 
-    var state by mutableStateOf(SearchWidgetState(true))
+    var state by mutableStateOf(SearchWidgetState(false))
 
     var dropDownMenuState by mutableStateOf(SearchWidgetDropDownState(false,
         listOf<Place>(), Place("", "")))
