@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Search
 import androidx.lifecycle.ViewModelProvider
 import com.rhuarhri.trainline.online.Online
 import com.rhuarhri.trainline.search_widget.SearchWidget
@@ -34,7 +38,43 @@ class MainActivity : ComponentActivity() {
         setContent {
             TrainLineTheme {
 
-                TimeTableWidget().widget(state = timetableWidgetViewModel.state)
+
+                val topBar = TopAppBar(
+                    title = {
+                        Text(
+                            text = "Train Time Table",
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            searchWidgetViewModel.show()
+                        }) {
+                            Icon(Icons.Filled.Search, "")
+                        }
+                    },
+                )
+                
+                Scaffold(topBar = {TopAppBar(
+                    title = {
+                        Text(
+                            text = "Train Time Table",
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            searchWidgetViewModel.show()
+                        }) {
+                            Icon(Icons.Filled.Search, "")
+                        }
+                    },
+                )},
+                    
+                    content = {
+                        TimeTableWidget().widget(state = timetableWidgetViewModel.state)
+                    } )
+
+
+                
 
                 SearchWidget().widget(this, searchWidgetViewModel, onSearch = {
                     //If I used only one view model then the code below would not be necessary

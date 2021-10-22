@@ -43,7 +43,10 @@ class SearchWidget {
                     datePicker(context = context, viewModel = viewModel)
                     timePicker(context = context, viewModel = viewModel)
 
-                    Button(onClick = onSearch,) {
+                    Button(onClick = {
+                                     viewModel.hide()
+                        onSearch.invoke()
+                    },) {
                         Text("Search")
                     }
                 }
