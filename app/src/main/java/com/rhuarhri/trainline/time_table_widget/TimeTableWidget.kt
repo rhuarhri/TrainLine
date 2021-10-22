@@ -1,8 +1,12 @@
 package com.rhuarhri.trainline.time_table_widget
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,7 +27,7 @@ class TimeTableWidget {
 
     @Composable
     fun widget(state: TimeTableWidgetState) {
-        LazyColumn(Modifier.fillMaxSize()) {
+        LazyColumn(Modifier.fillMaxSize(),) {
             items(items = state.timeTable) { item ->
                 timeTableItem(platform = item.platform, departAt = item.departAt,
                     start = item.start, destination = item.destination)

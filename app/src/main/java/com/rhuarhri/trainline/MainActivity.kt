@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Search
 import androidx.lifecycle.ViewModelProvider
@@ -52,38 +53,46 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                 )},
-                    
                     content = {
                         TimeTableWidget().widget(state = timetableWidgetViewModel.state)
-                    } )
+                    },
+                floatingActionButton = {
+                    FloatingActionButton(onClick = {
+                                         searchForTimeTable()
+                    }, content = {Icon(Icons.Filled.Refresh, "")})
+                })
 
 
                 SearchWidget().widget(this, searchWidgetViewModel, onSearch = {
-                    //If I used only one view model then the code below would not be necessary
-
-                    val day = searchWidgetViewModel.datePickerState.day
-                    val month = searchWidgetViewModel.datePickerState.month
-                    val year = searchWidgetViewModel.datePickerState.year
-
-                    val date : String = Online.covertDate(year, month, day)
-
-                    val hour = searchWidgetViewModel.timePickerState.hour
-                    val minutes = searchWidgetViewModel.timePickerState.minutes
-
-                    val time = Online.convertTime(hour, minutes)
-
-                    val stationLocation = searchWidgetViewModel.dropDownMenuState.selected
-
-                    val stationCode = if (stationLocation.code == "") {
-                        "SHF"
-                    } else {
-                        stationLocation.code
-                    }
-
-                    timetableWidgetViewModel.search(stationCode, date, time)
+                    searchForTimeTable()
                 })
             }
         }
+    }
+
+    private fun searchForTimeTable() {
+        //If I used only one view model then the code below would not be necessary
+
+        val day = searchWidgetViewModel.datePickerState.day
+        val month = searchWidgetViewModel.datePickerState.month
+        val year = searchWidgetViewModel.datePickerState.year
+
+        val date : String = Online.covertDate(year, month, day)
+
+        val hour = searchWidgetViewModel.timePickerState.hour
+        val minutes = searchWidgetViewModel.timePickerState.minutes
+
+        val time = Online.convertTime(hour, minutes)
+
+        val stationLocation = searchWidgetViewModel.dropDownMenuState.selected
+
+        val stationCode = if (stationLocation.code == "") {
+            "SHF"
+        } else {
+            stationLocation.code
+        }
+
+        timetableWidgetViewModel.search(stationCode, date, time)
     }
 }
 
