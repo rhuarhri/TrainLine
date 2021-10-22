@@ -98,12 +98,30 @@ class TimeTableWidgetRepo {
         val timeTable = mutableListOf<TimeTableItem>()
 
         for (item in found) {
-            val platform = item.platform
+            var platform = item.platform
             val departAt = item.aimed_departure_time
             val start = item.origin_name
             val destination = item.destination_name
 
-            if (platform != null && departAt != null && start != null && destination != null) {
+            /*
+            I think because the places.json file / functionality of the transport api is still a
+            working progress.
+            See
+            https://developer.transportapi.com/docs?raml=https://transportapi.com/v3/raml/transportapi.raml##uk_places_json
+            maybe causing the platform variable to be null
+            Why? because the app gets a list of train stations from the places.json file.
+            The code of the train station is used to find the time table of the train station, which
+            contains a null value for the platform.
+            Another possibility is that a train station with a null value platform means that it has
+            only one platform.
+            either way if the platform value is null replace with NA
+             */
+
+            if (platform == null) {
+                platform = "NA"
+            }
+
+            if (departAt != null && start != null && destination != null) {
                 /*
                 removing all null data and getting only the most useful data
                  */
