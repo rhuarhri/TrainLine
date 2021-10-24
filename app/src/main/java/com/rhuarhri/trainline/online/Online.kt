@@ -2,6 +2,7 @@ package com.rhuarhri.trainline.online
 
 import com.rhuarhri.trainline.online.time_table_data.All
 import com.rhuarhri.trainline.online.time_table_data.TimeTable
+import com.rhuarhri.trainline.online.train_service_data.Service
 import com.rhuarhri.trainline.online.train_station_location_data.TrainStation
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -20,31 +21,32 @@ class Online {
             .build()
     }
 
-    suspend fun getTimeTable(stationName: String = "SHF", date : String, time : String) : List<All> {
+    suspend fun getTimeTable(stationName: String = "SHF", date : String, time : String) : TimeTable {
         val url = BASE_URL + "train/station/" + stationName + "/" + date + "/" + time + "/"
         println("base url is $url")
         val retrofitInterface = setupRetrofit(url).create(OnlineInterface::class.java)
-        val timeTable = retrofitInterface.getTimeTable().await()
+        return retrofitInterface.getTimeTable().await()
+    }
 
-        if (timeTable.departures != null) {
-            if (timeTable.departures.all != null) {
-                return timeTable.departures.all
-            } else {
-                return listOf<All>()
-            }
-        } else {
-            return listOf<All>()
-        }
+    suspend fun getServiceInfo(trainId: String, date : String) : Service {
+        val url = BASE_URL + "/train/service/train_uid:" + trainId + "/" + date + "/"
+        println("base url is $url")
+        val retrofitInterface = setupRetrofit(url).create(OnlineInterface::class.java)
+        return retrofitInterface.getServiceInfo().await()
     }
 
     suspend fun getStation() : TrainStation {
         val retrofitInterface = setupRetrofit(BASE_URL).create(OnlineInterface::class.java)
 
-
         return retrofitInterface.getPlace().await()
     }
 
     companion object {
+        /*Why here
+          This is because the code below is linked to the querying of the REST full api
+          which is handled in the online class.
+        */
+
         fun convertTime(hours : Int, minutes : Int) : String {
             val hourText = if (hours < 10) {
                 "0$hours"
@@ -90,6 +92,9 @@ interface OnlineInterface {
 
     @GET("timetable.json?app_id=c9ef48df&app_key=f7dc9efc73b6cd485d10835de81c6ed6&train_status=passenger")
     fun getTimeTable() : Call<TimeTable>
+
+    @GET("timetable.json?app_id=c9ef48df&app_key=f7dc9efc73b6cd485d10835de81c6ed6")
+    fun getServiceInfo() : Call<Service>
 
     @GET("places.json?app_id=c9ef48df&app_key=f7dc9efc73b6cd485d10835de81c6ed6&type=train_station")
     fun getPlace() : Call<TrainStation>

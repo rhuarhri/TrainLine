@@ -1,5 +1,6 @@
 package com.rhuarhri.trainline
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -54,7 +55,7 @@ class MainActivity : ComponentActivity() {
                     },
                 )},
                     content = {
-                        TimeTableWidget().widget(state = timetableWidgetViewModel.state)
+                        TimeTableWidget().widget(this, state = timetableWidgetViewModel.state)
                     },
                 floatingActionButton = {
                     FloatingActionButton(onClick = {

@@ -90,13 +90,14 @@ class SearchWidget {
     @Composable
     fun datePicker(context : Context, viewModel: SearchWidgetViewModel) {
         val currentYear = viewModel.datePickerState.year
-        val currentMonth = viewModel.datePickerState.month
+        //month starts from 0
+        val currentMonth = (viewModel.datePickerState.month - 1)
         val currentDay = viewModel.datePickerState.day
-        val datePicker = DatePickerDialog(context, { datePicker, day, month, year ->
-            viewModel.selectDate(day, month, year)
+        val datePicker = DatePickerDialog(context, { datePicker, year, month, day ->
+            viewModel.selectDate(day, (month + 1), year)
         }, currentYear, currentMonth, currentDay)
 
-        inputDisplay(title = "Date", data = "$currentDay/$currentMonth/$currentYear", onClick = {datePicker.show()})
+        inputDisplay(title = "Date", data = "$currentDay/${(currentMonth +1)}/$currentYear", onClick = {datePicker.show()})
     }
 
     @Composable
@@ -146,8 +147,9 @@ class SearchWidgetViewModel : ViewModel() {
 
     private val calendar = Calendar.getInstance()
 
+    //calender month starts from 0
     var datePickerState by mutableStateOf(SearchWidgetDatePickerState(day = calendar[Calendar.DAY_OF_MONTH],
-        month = calendar[Calendar.MONTH], year = calendar[Calendar.YEAR]))
+        month = (calendar[Calendar.MONTH] + 1), year = calendar[Calendar.YEAR]))
 
     var timePickerState by mutableStateOf(SearchWidgetTimePickerState(hour = calendar[Calendar.HOUR],
         minutes = calendar[Calendar.MINUTE]))

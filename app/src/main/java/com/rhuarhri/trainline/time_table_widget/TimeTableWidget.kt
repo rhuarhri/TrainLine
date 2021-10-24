@@ -1,6 +1,9 @@
 package com.rhuarhri.trainline.time_table_widget
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rhuarhri.trainline.ViewTrainTime
 import com.rhuarhri.trainline.online.Online
+import com.rhuarhri.trainline.online.time_table_data.All
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,21 +31,27 @@ import kotlinx.coroutines.withContext
 class TimeTableWidget {
 
     @Composable
-    fun widget(state: TimeTableWidgetState) {
+    fun widget(context : Context, state: TimeTableWidgetState) {
         LazyColumn(Modifier.fillMaxSize(),) {
             items(items = state.timeTable) { item ->
-                timeTableItem(platform = item.platform, departAt = item.departAt,
-                    start = item.start, destination = item.destination)
+                timeTableItem(context = context, platform = item.platform, departAt = item.departAt,
+                    start = item.start, destination = item.destination, trainId = item.trainId, date = item.date)
             }
         }
     }
 
     @Composable
-    private fun timeTableItem(platform: String, departAt: String, start: String, destination: String) {
+    private fun timeTableItem(context : Context, platform: String, departAt: String,
+                              start: String, destination: String, trainId: String, date: String) {
 
         Column(modifier = Modifier
             .height(100.dp)
-            .fillMaxWidth()) {
+            .fillMaxWidth().clickable {
+                val intent = Intent(context, ViewTrainTime::class.java)
+                intent.putExtra("trainId", trainId)
+                intent.putExtra("date", date)
+                context.startActivity(intent)
+            }) {
             Row(
                 Modifier
                     .weight(2f)
@@ -89,7 +100,9 @@ class TimetableWidgetViewModel : ViewModel() {
 
 }
 
-data class TimeTableItem(val platform: String, val departAt: String, val start : String, val destination: String)
+data class TimeTableItem(val platform: String, val departAt: String,
+                         val start : String, val destination: String,
+                         val trainId: String, val date : String)
 
 class TimeTableWidgetRepo {
 
@@ -101,11 +114,24 @@ class TimeTableWidgetRepo {
 
         val timeTable = mutableListOf<TimeTableItem>()
 
-        for (item in found) {
+        val all = if (found.departures != null) {
+            if (found.departures.all != null) {
+                found.departures.all
+            } else {
+                listOf<All>()
+            }
+        } else {
+            listOf<All>()
+        }
+
+        for (item in all) {
             var platform = item.platform
             val departAt = item.aimed_departure_time
             val start = item.origin_name
             val destination = item.destination_name
+
+            val trainId = item.train_uid ?: ""
+            val date = found.date ?: ""
 
             /*
             I think because the places.json file / functionality of the transport api is still a
@@ -129,7 +155,8 @@ class TimeTableWidgetRepo {
                 /*
                 removing all null data and getting only the most useful data
                  */
-                val timeTableItem = TimeTableItem(platform = platform, departAt = departAt, start = start, destination = destination)
+                val timeTableItem = TimeTableItem(platform = platform, departAt = departAt, start = start,
+                    destination = destination, trainId = trainId, date = date)
                 timeTable.add(timeTableItem)
             }
         }

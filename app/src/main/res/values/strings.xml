@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TrainLine</string>
+    <string name="title_activity_view_train_time">ViewTrainTime</string>
 </resources>
