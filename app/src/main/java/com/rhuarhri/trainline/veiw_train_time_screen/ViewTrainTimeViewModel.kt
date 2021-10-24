@@ -34,24 +34,24 @@ class ViewTrainTimeRepo {
     private val online = Online()
 
     suspend fun getServiceInfo(trainId : String, date : String) : ServiceInfo {
-        val service = online.getServiceInfo(trainId, date)
+        val service = online.getServiceInfo(trainId, date) ?: return ServiceInfo("", "", "", listOf())
 
-        val date = service.date ?: ""
+        val serviceDate = service.date ?: ""
 
-        val start = service.origin_name ?: ""
-        val end = service.destination_name ?: ""
+        val serviceStart = service.origin_name ?: ""
+        val serviceEnd = service.destination_name ?: ""
 
-        val stops = mutableListOf<Stop>()
+        val serviceStops = mutableListOf<Stop>()
 
         if (service.stops != null) {
             for (foundStop in service.stops) {
                 if (foundStop.aimed_departure_time != null && foundStop.station_name != null) {
                     val newStop = Stop(foundStop.aimed_departure_time, foundStop.station_name)
-                    stops.add(newStop)
+                    serviceStops.add(newStop)
                 }
             }
         }
 
-        return ServiceInfo(date, start, end, stops)
+        return ServiceInfo(serviceDate, serviceStart, serviceEnd, serviceStops)
     }
 }

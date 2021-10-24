@@ -29,19 +29,19 @@ class SearchWidget {
 
     @ExperimentalAnimationApi
     @Composable
-    fun widget(context: Context, viewModel: SearchWidgetViewModel, onSearch : () -> Unit) {
+    fun Widget(context: Context, viewModel: SearchWidgetViewModel, onSearch : () -> Unit) {
 
-        AnimatedVisibility(visible = viewModel.state.visible,) {
+        AnimatedVisibility(visible = viewModel.state.visible) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White), Alignment.TopCenter
             ) {
                 Column() {
-                    dropDownWidget(viewModel = viewModel)
+                    DropDownWidget(viewModel = viewModel)
 
-                    datePicker(context = context, viewModel = viewModel)
-                    timePicker(context = context, viewModel = viewModel)
+                    DatePicker(context = context, viewModel = viewModel)
+                    TimePicker(context = context, viewModel = viewModel)
 
                     Button(onClick = {
                                      viewModel.hide()
@@ -55,7 +55,7 @@ class SearchWidget {
     }
 
     @Composable
-    private fun inputDisplay(title: String, data: String, onClick : () -> Unit) {
+    private fun InputDisplay(title: String, data: String, onClick : () -> Unit) {
         Column(
             Modifier
                 .height(90.dp)
@@ -72,8 +72,8 @@ class SearchWidget {
     }
 
     @Composable
-    private fun dropDownWidget(viewModel: SearchWidgetViewModel) {
-        inputDisplay(title = "Station", data = viewModel.dropDownMenuState.selected.name, onClick = {
+    private fun DropDownWidget(viewModel: SearchWidgetViewModel) {
+        InputDisplay(title = "Station", data = viewModel.dropDownMenuState.selected.name, onClick = {
             viewModel.expandDropDown()
         })
         DropdownMenu(expanded = viewModel.dropDownMenuState.dropDownExpanded,
@@ -88,7 +88,7 @@ class SearchWidget {
     }
 
     @Composable
-    fun datePicker(context : Context, viewModel: SearchWidgetViewModel) {
+    fun DatePicker(context : Context, viewModel: SearchWidgetViewModel) {
         val currentYear = viewModel.datePickerState.year
         //month starts from 0
         val currentMonth = (viewModel.datePickerState.month - 1)
@@ -97,19 +97,19 @@ class SearchWidget {
             viewModel.selectDate(day, (month + 1), year)
         }, currentYear, currentMonth, currentDay)
 
-        inputDisplay(title = "Date", data = "$currentDay/${(currentMonth +1)}/$currentYear", onClick = {datePicker.show()})
+        InputDisplay(title = "Date", data = "$currentDay/${(currentMonth +1)}/$currentYear", onClick = {datePicker.show()})
     }
 
     @Composable
-    fun timePicker(context: Context, viewModel: SearchWidgetViewModel) {
+    fun TimePicker(context: Context, viewModel: SearchWidgetViewModel) {
         val currentHour = viewModel.timePickerState.hour
         val currentMinutes = viewModel.timePickerState.minutes
 
-        val timePicker = TimePickerDialog(context,TimePickerDialog.OnTimeSetListener { timePicker, hour, minute ->
+        val timePicker = TimePickerDialog(context, { timePicker, hour, minute ->
             viewModel.selectTime(hour, minute)
         }, currentHour, currentMinutes, true)
 
-        inputDisplay(title = "Time", data = "$currentHour:$currentMinutes", onClick = {timePicker.show()})
+        InputDisplay(title = "Time", data = "$currentHour:$currentMinutes", onClick = {timePicker.show()})
     }
 }
 
@@ -228,7 +228,7 @@ class SearchWidgetRepo {
     private val online = Online()
 
     suspend fun getPlaces() : List<Place> {
-        val trainStation = online.getStation()
+        val trainStation = online.getStation() ?: return listOf<Place>()
 
         val places = mutableListOf<Place>()
         if (trainStation.member != null) {

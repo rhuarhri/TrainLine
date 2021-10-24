@@ -1,6 +1,5 @@
 package com.rhuarhri.trainline
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,7 +8,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.rounded.Search
 import androidx.lifecycle.ViewModelProvider
 import com.rhuarhri.trainline.online.Online
 import com.rhuarhri.trainline.search_widget.SearchWidget
@@ -19,11 +17,6 @@ import com.rhuarhri.trainline.time_table_widget.TimetableWidgetViewModel
 import com.rhuarhri.trainline.ui.theme.TrainLineTheme
 
 class MainActivity : ComponentActivity() {
-
-    /*
-    App id c9ef48df
-    api key f7dc9efc73b6cd485d10835de81c6ed6
-     */
 
     lateinit var searchWidgetViewModel: SearchWidgetViewModel
     lateinit var timetableWidgetViewModel: TimetableWidgetViewModel
@@ -55,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     },
                 )},
                     content = {
-                        TimeTableWidget().widget(this, state = timetableWidgetViewModel.state)
+                        TimeTableWidget().Widget(this, state = timetableWidgetViewModel.state)
                     },
                 floatingActionButton = {
                     FloatingActionButton(onClick = {
@@ -64,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 })
 
 
-                SearchWidget().widget(this, searchWidgetViewModel, onSearch = {
+                SearchWidget().Widget(this, searchWidgetViewModel, onSearch = {
                     searchForTimeTable()
                 })
             }

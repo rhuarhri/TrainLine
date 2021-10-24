@@ -1,6 +1,5 @@
 package com.rhuarhri.trainline.online
 
-import com.rhuarhri.trainline.online.time_table_data.All
 import com.rhuarhri.trainline.online.time_table_data.TimeTable
 import com.rhuarhri.trainline.online.train_service_data.Service
 import com.rhuarhri.trainline.online.train_station_location_data.TrainStation
@@ -12,7 +11,7 @@ import retrofit2.http.GET
 
 class Online {
 
-    private val BASE_URL = "http://transportapi.com/v3/uk/"
+    private val BASE = "http://transportapi.com/v3/uk/"
 
     private fun setupRetrofit(url: String) : Retrofit {
         return Retrofit.Builder()
@@ -21,24 +20,38 @@ class Online {
             .build()
     }
 
-    suspend fun getTimeTable(stationName: String = "SHF", date : String, time : String) : TimeTable {
-        val url = BASE_URL + "train/station/" + stationName + "/" + date + "/" + time + "/"
-        println("base url is $url")
-        val retrofitInterface = setupRetrofit(url).create(OnlineInterface::class.java)
-        return retrofitInterface.getTimeTable().await()
+    suspend fun getTimeTable(stationName: String = "SHF", date : String = "", time : String = "") : TimeTable? {
+        val url = "" + BASE + "train/station/" + stationName + "/" + date + "/" + time + "/"
+        return try {
+            val retrofitInterface = setupRetrofit(url).create(OnlineInterface::class.java)
+            retrofitInterface.getTimeTable().await()
+        } catch (e : Exception) {
+            null
+        }
     }
 
-    suspend fun getServiceInfo(trainId: String, date : String) : Service {
-        val url = BASE_URL + "/train/service/train_uid:" + trainId + "/" + date + "/"
-        println("base url is $url")
-        val retrofitInterface = setupRetrofit(url).create(OnlineInterface::class.java)
-        return retrofitInterface.getServiceInfo().await()
+    suspend fun getServiceInfo(trainId: String, date : String) : Service? {
+        if (trainId.isBlank() && date.isBlank()) {
+            return null
+        }
+
+        val url = "$BASE/train/service/train_uid:$trainId/$date/"
+        return try {
+            val retrofitInterface = setupRetrofit(url).create(OnlineInterface::class.java)
+            retrofitInterface.getServiceInfo().await()
+        } catch (e : Exception) {
+            null
+        }
     }
 
-    suspend fun getStation() : TrainStation {
-        val retrofitInterface = setupRetrofit(BASE_URL).create(OnlineInterface::class.java)
+    suspend fun getStation() : TrainStation? {
+        return try {
+        val retrofitInterface = setupRetrofit(BASE).create(OnlineInterface::class.java)
 
-        return retrofitInterface.getPlace().await()
+        retrofitInterface.getPlace().await()
+        } catch (e : Exception) {
+            null
+        }
     }
 
     companion object {

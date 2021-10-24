@@ -31,17 +31,17 @@ import kotlinx.coroutines.withContext
 class TimeTableWidget {
 
     @Composable
-    fun widget(context : Context, state: TimeTableWidgetState) {
+    fun Widget(context : Context, state: TimeTableWidgetState) {
         LazyColumn(Modifier.fillMaxSize(),) {
             items(items = state.timeTable) { item ->
-                timeTableItem(context = context, platform = item.platform, departAt = item.departAt,
+                TimeTableItem(context = context, platform = item.platform, departAt = item.departAt,
                     start = item.start, destination = item.destination, trainId = item.trainId, date = item.date)
             }
         }
     }
 
     @Composable
-    private fun timeTableItem(context : Context, platform: String, departAt: String,
+    private fun TimeTableItem(context : Context, platform: String, departAt: String,
                               start: String, destination: String, trainId: String, date: String) {
 
         Column(modifier = Modifier
@@ -110,7 +110,7 @@ class TimeTableWidgetRepo {
 
     suspend fun searchForTimeTable(stationName: String = "SHF", date : String = "", time : String = "")
     : List<TimeTableItem> {
-        val found = online.getTimeTable(stationName, date, time)
+        val found = online.getTimeTable(stationName, date, time) ?: return listOf()
 
         val timeTable = mutableListOf<TimeTableItem>()
 
