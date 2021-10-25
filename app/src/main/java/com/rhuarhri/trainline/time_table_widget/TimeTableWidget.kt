@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rhuarhri.trainline.ViewTrainTime
+import com.rhuarhri.trainline.data.TimeTable
 import com.rhuarhri.trainline.online.Online
 import com.rhuarhri.trainline.online.time_table_data.All
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +72,7 @@ class TimeTableWidget {
     }
 }
 
-class TimeTableWidgetState(val timeTable : List<TimeTableItem>) {
+class TimeTableWidgetState(val timeTable : List<TimeTable>) {
 
 }
 
@@ -100,19 +101,17 @@ class TimetableWidgetViewModel : ViewModel() {
 
 }
 
-data class TimeTableItem(val platform: String, val departAt: String,
-                         val start : String, val destination: String,
-                         val trainId: String, val date : String)
+
 
 class TimeTableWidgetRepo {
 
     private val online = Online()
 
     suspend fun searchForTimeTable(stationName: String = "SHF", date : String = "", time : String = "")
-    : List<TimeTableItem> {
+    : List<TimeTable> {
         val found = online.getTimeTable(stationName, date, time) ?: return listOf()
 
-        val timeTable = mutableListOf<TimeTableItem>()
+        val timeTable = mutableListOf<TimeTable>()
 
         val all = if (found.departures != null) {
             if (found.departures.all != null) {
@@ -155,7 +154,7 @@ class TimeTableWidgetRepo {
                 /*
                 removing all null data and getting only the most useful data
                  */
-                val timeTableItem = TimeTableItem(platform = platform, departAt = departAt, start = start,
+                val timeTableItem = TimeTable(platform = platform, departAt = departAt, start = start,
                     destination = destination, trainId = trainId, date = date)
                 timeTable.add(timeTableItem)
             }

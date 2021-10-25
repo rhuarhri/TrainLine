@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -8,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.rhuarhri.trainline"
-        minSdk 23
+        minSdk 26
         targetSdk 30
         versionCode 1
         versionName "1.0"
@@ -62,6 +63,19 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
+
+    implementation "androidx.room:room-runtime:2.3.0"
+    annotationProcessor "androidx.room:room-compiler:2.3.0"
+
+    kapt("androidx.room:room-compiler:2.3.0")
+
+    implementation "androidx.room:room-ktx:2.3.0"
+
+    implementation("androidx.room:room-rxjava2:2.3.0")
+
+    implementation("androidx.room:room-rxjava3:2.3.0")
+
+    testImplementation "androidx.room:room-testing:2.3.0"
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

@@ -11,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import com.rhuarhri.trainline.data.Stop
 import com.rhuarhri.trainline.ui.theme.TrainLineTheme
-import com.rhuarhri.trainline.veiw_train_time_screen.Stop
 import com.rhuarhri.trainline.veiw_train_time_screen.ViewTrainTimeViewModel
 
 class ViewTrainTime : ComponentActivity() {

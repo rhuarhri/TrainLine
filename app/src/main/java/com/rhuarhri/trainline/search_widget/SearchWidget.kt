@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rhuarhri.trainline.data.Station
 import com.rhuarhri.trainline.online.Online
 import kotlinx.coroutines.launch
 import java.util.*
@@ -123,8 +124,8 @@ class SearchWidgetState(val visible : Boolean)
     solution 2: don't use a data class to store state
     */
 class SearchWidgetDropDownState(val dropDownExpanded : Boolean = false,
-                                     val dropDownItems : List<Place> = listOf(),
-                                     val selected : Place)
+                                     val dropDownItems : List<Station> = listOf(),
+                                     val selected : Station)
 
 class SearchWidgetDatePickerState(val day : Int, val month : Int, val year : Int)
 
@@ -143,7 +144,7 @@ class SearchWidgetViewModel : ViewModel() {
     var state by mutableStateOf(SearchWidgetState(false))
 
     var dropDownMenuState by mutableStateOf(SearchWidgetDropDownState(false,
-        listOf<Place>(), Place("", "")))
+        listOf<Station>(),  Station("", "")))
 
     private val calendar = Calendar.getInstance()
 
@@ -180,10 +181,10 @@ class SearchWidgetViewModel : ViewModel() {
     fun setupDropDownWidget() {
         viewModelScope.launch {
             val places = repo.getPlaces()
-            val selected : Place = if (places.isEmpty()) {
+            val selected : Station = if (places.isEmpty()) {
                 places.first()
             } else {
-                Place("", "")
+                Station("", "")
             }
 
             val newDropDownState = SearchWidgetDropDownState(false, places, selected)
@@ -191,7 +192,7 @@ class SearchWidgetViewModel : ViewModel() {
         }
     }
 
-    fun selectDropDownItem(item : Place) {
+    fun selectDropDownItem(item : Station) {
         val newDropDownState = SearchWidgetDropDownState(false, dropDownMenuState.dropDownItems, item)
         dropDownMenuState = newDropDownState
     }
@@ -220,17 +221,13 @@ class SearchWidgetViewModel : ViewModel() {
 
 }
 
-data class Place(val name : String, val code : String) {
-    /*This is used to filter out unnecessary information*/
-}
-
 class SearchWidgetRepo {
     private val online = Online()
 
-    suspend fun getPlaces() : List<Place> {
-        val trainStation = online.getStation() ?: return listOf<Place>()
+    suspend fun getPlaces() : List<Station> {
+        val trainStation = online.getStation() ?: return listOf<Station>()
 
-        val places = mutableListOf<Place>()
+        val stations = mutableListOf<Station>()
         if (trainStation.member != null) {
 
             for (stationInfo in trainStation.member) {
@@ -238,12 +235,12 @@ class SearchWidgetRepo {
                 val code = stationInfo.station_code
 
                 if (name != null && code != null) {
-                    val place = Place(name, code)
-                    places.add(place)
+                    val station = Station(name, code)
+                    stations.add(station)
                 }
             }
         }
 
-        return places
+        return stations
     }
 }

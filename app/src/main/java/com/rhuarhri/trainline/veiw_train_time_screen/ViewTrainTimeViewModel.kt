@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rhuarhri.trainline.data.ServiceInfo
+import com.rhuarhri.trainline.data.Stop
 import com.rhuarhri.trainline.online.Online
 import kotlinx.coroutines.launch
 
@@ -20,14 +22,6 @@ class ViewTrainTimeViewModel : ViewModel() {
             }
         }
     }
-}
-
-data class ServiceInfo(val date : String, val start : String, val end : String, val stops : List<Stop>) {
-
-}
-
-data class Stop(val time : String, val stationName : String) {
-
 }
 
 class ViewTrainTimeRepo {
