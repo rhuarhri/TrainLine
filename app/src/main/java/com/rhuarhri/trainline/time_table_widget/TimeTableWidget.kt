@@ -2,14 +2,10 @@ package com.rhuarhri.trainline.time_table_widget
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.rhuarhri.trainline.ViewTrainTime
 import com.rhuarhri.trainline.data.TimeTable
@@ -76,10 +73,20 @@ class TimeTableWidgetState(val timeTable : List<TimeTable>) {
 
 }
 
-class TimetableWidgetViewModel : ViewModel() {
+class TimeTableWidgetViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    /*
+    This is a factory class. It is used to deal with the complexity of creating a view model.
+    If the view model did not have to use context then this factory class would not exist.
+     */
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        return TimetableWidgetViewModel(context) as T
+    }
+}
+
+class TimetableWidgetViewModel(context: Context) : ViewModel() {
 
     var state by mutableStateOf(TimeTableWidgetState(listOf()))
-    private val repo = TimeTableWidgetRepo()
+    private val repo = TimeTableWidgetRepo(context)
 
     fun search(stationName: String, date : String, time : String) {
 
@@ -103,9 +110,9 @@ class TimetableWidgetViewModel : ViewModel() {
 
 
 
-class TimeTableWidgetRepo {
+class TimeTableWidgetRepo(context: Context) {
 
-    private val online = Online()
+    private val online = Online(context)
 
     suspend fun searchForTimeTable(stationName: String = "SHF", date : String = "", time : String = "")
     : List<TimeTable> {
@@ -130,7 +137,7 @@ class TimeTableWidgetRepo {
             val destination = item.destination_name
 
             val trainId = item.train_uid ?: ""
-            val date = found.date ?: ""
+            val trainDate = found.date ?: ""
 
             /*
             I think because the places.json file / functionality of the transport api is still a
@@ -155,7 +162,7 @@ class TimeTableWidgetRepo {
                 removing all null data and getting only the most useful data
                  */
                 val timeTableItem = TimeTable(platform = platform, departAt = departAt, start = start,
-                    destination = destination, trainId = trainId, date = date)
+                    destination = destination, trainId = trainId, date = trainDate)
                 timeTable.add(timeTableItem)
             }
         }

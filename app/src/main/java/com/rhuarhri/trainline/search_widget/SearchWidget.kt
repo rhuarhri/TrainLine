@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.rhuarhri.trainline.data.Station
 import com.rhuarhri.trainline.online.Online
@@ -131,8 +132,14 @@ class SearchWidgetDatePickerState(val day : Int, val month : Int, val year : Int
 
 class SearchWidgetTimePickerState(val hour : Int, val minutes : Int)
 
-class SearchWidgetViewModel : ViewModel() {
-    private val repo = SearchWidgetRepo()
+class SearchWidgetViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        return SearchWidgetViewModel(context) as T
+    }
+}
+
+class SearchWidgetViewModel(context: Context) : ViewModel() {
+    private val repo = SearchWidgetRepo(context)
 
     /*
     Why does a widget have it's own view model
@@ -221,8 +228,8 @@ class SearchWidgetViewModel : ViewModel() {
 
 }
 
-class SearchWidgetRepo {
-    private val online = Online()
+class SearchWidgetRepo(context: Context) {
+    private val online = Online(context)
 
     suspend fun getPlaces() : List<Station> {
         val trainStation = online.getStation() ?: return listOf<Station>()

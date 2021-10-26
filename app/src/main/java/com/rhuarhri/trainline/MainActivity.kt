@@ -12,7 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.rhuarhri.trainline.online.Online
 import com.rhuarhri.trainline.search_widget.SearchWidget
 import com.rhuarhri.trainline.search_widget.SearchWidgetViewModel
+import com.rhuarhri.trainline.search_widget.SearchWidgetViewModelFactory
 import com.rhuarhri.trainline.time_table_widget.TimeTableWidget
+import com.rhuarhri.trainline.time_table_widget.TimeTableWidgetViewModelFactory
 import com.rhuarhri.trainline.time_table_widget.TimetableWidgetViewModel
 import com.rhuarhri.trainline.ui.theme.TrainLineTheme
 
@@ -25,10 +27,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        searchWidgetViewModel = ViewModelProvider(this).get(SearchWidgetViewModel::class.java)
+        searchWidgetViewModel = ViewModelProvider(this, SearchWidgetViewModelFactory(this.applicationContext))
+            .get(SearchWidgetViewModel::class.java)
         searchWidgetViewModel.setupDropDownWidget()
 
-        timetableWidgetViewModel = ViewModelProvider(this).get(TimetableWidgetViewModel::class.java)
+        timetableWidgetViewModel = ViewModelProvider(this, TimeTableWidgetViewModelFactory(this.applicationContext))
+            .get(TimetableWidgetViewModel::class.java)
 
         setContent {
             TrainLineTheme {

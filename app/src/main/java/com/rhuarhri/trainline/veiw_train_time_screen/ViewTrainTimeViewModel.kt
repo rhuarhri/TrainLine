@@ -1,18 +1,27 @@
 package com.rhuarhri.trainline.veiw_train_time_screen
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.rhuarhri.trainline.data.ServiceInfo
 import com.rhuarhri.trainline.data.Stop
 import com.rhuarhri.trainline.online.Online
 import kotlinx.coroutines.launch
 
-class ViewTrainTimeViewModel : ViewModel() {
+class ViewTrainTimeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        return ViewTrainTimeViewModel(context) as T
+    }
 
-    private val repo = ViewTrainTimeRepo()
+}
+
+class ViewTrainTimeViewModel(context: Context) : ViewModel() {
+
+    private val repo = ViewTrainTimeRepo(context)
     var state by mutableStateOf(ServiceInfo("", "", "", listOf()))
 
     fun setup(trainId : String, date : String) {
@@ -24,8 +33,8 @@ class ViewTrainTimeViewModel : ViewModel() {
     }
 }
 
-class ViewTrainTimeRepo {
-    private val online = Online()
+class ViewTrainTimeRepo(context : Context) {
+    private val online = Online(context)
 
     suspend fun getServiceInfo(trainId : String, date : String) : ServiceInfo {
         val service = online.getServiceInfo(trainId, date) ?: return ServiceInfo("", "", "", listOf())

@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.rhuarhri.trainline.data.Stop
 import com.rhuarhri.trainline.ui.theme.TrainLineTheme
 import com.rhuarhri.trainline.veiw_train_time_screen.ViewTrainTimeViewModel
+import com.rhuarhri.trainline.veiw_train_time_screen.ViewTrainTimeViewModelFactory
 
 class ViewTrainTime : ComponentActivity() {
 
@@ -25,7 +26,8 @@ class ViewTrainTime : ComponentActivity() {
         val trainId = intent.getStringExtra("trainId")
         val date = intent.getStringExtra("date")
 
-        viewTrainTimeViewModel = ViewModelProvider(this).get(ViewTrainTimeViewModel::class.java)
+        viewTrainTimeViewModel = ViewModelProvider(this, ViewTrainTimeViewModelFactory(this.applicationContext))
+            .get(ViewTrainTimeViewModel::class.java)
         if (trainId != null && date != null) {
             viewTrainTimeViewModel.setup(trainId, date)
         }

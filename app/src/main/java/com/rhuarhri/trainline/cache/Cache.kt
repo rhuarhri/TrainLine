@@ -111,7 +111,7 @@ interface DatabaseInterface {
     fun addStop(stop : StopEntity)
 
     @Query("SELECT * FROM stop WHERE serviceId = :serviceId")
-    fun getStops(serviceId: String)
+    fun getStops(serviceId: String) : List<StopEntity>
 
 }
 
