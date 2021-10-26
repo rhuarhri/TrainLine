@@ -126,6 +126,10 @@ class Online(private val context: Context) {
     }
 
     private fun getHttpClient() : OkHttpClient {
+        /*
+        A better solution for caching is using a room database because
+        it allows you to query any cached data.
+         */
         return OkHttpClient.Builder()
             .cache(getCache())
             .addNetworkInterceptor(getNetworkInterceptor())
