@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -19,9 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.rhuarhri.trainline.data.Station
 import com.rhuarhri.trainline.online.Online
 import kotlinx.coroutines.launch
@@ -66,10 +65,12 @@ class SearchWidget {
                 .border(2.dp, MaterialTheme.colors.primary)) {
             Text(modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth().padding(5.dp), text = title)
+                .fillMaxWidth()
+                .padding(5.dp), text = title)
             Text(modifier = Modifier
                 .weight(2f)
-                .fillMaxWidth().padding(5.dp), text = data, fontSize = 20.sp)
+                .fillMaxWidth()
+                .padding(5.dp), text = data, fontSize = 20.sp)
         }
     }
 
@@ -80,7 +81,8 @@ class SearchWidget {
         })
         DropdownMenu(expanded = viewModel.dropDownMenuState.dropDownExpanded,
             onDismissRequest = { viewModel.minimiseDropDown() }) {
-            for (item in viewModel.dropDownMenuState.dropDownItems) {
+            val placesList by viewModel.placesListState.observeAsState(initial = listOf<Station>())
+            for (item in placesList) {
                 DropdownMenuItem(onClick = {viewModel.selectDropDownItem(item)}) {
                     Text(item.name)
                 }
@@ -125,7 +127,6 @@ class SearchWidgetState(val visible : Boolean)
     solution 2: don't use a data class to store state
     */
 class SearchWidgetDropDownState(val dropDownExpanded : Boolean = false,
-                                     val dropDownItems : List<Station> = listOf(),
                                      val selected : Station)
 
 class SearchWidgetDatePickerState(val day : Int, val month : Int, val year : Int)
@@ -150,8 +151,13 @@ class SearchWidgetViewModel(context: Context) : ViewModel() {
 
     var state by mutableStateOf(SearchWidgetState(false))
 
-    var dropDownMenuState by mutableStateOf(SearchWidgetDropDownState(false,
-        listOf<Station>(),  Station("", "")))
+    var dropDownMenuState by mutableStateOf(SearchWidgetDropDownState(false, Station("", "")))
+
+    val placesListState = repo.places
+
+    init {
+        setupDropDownWidget()
+    }
 
     private val calendar = Calendar.getInstance()
 
@@ -185,34 +191,34 @@ class SearchWidgetViewModel(context: Context) : ViewModel() {
         timePickerState = newTimePickerState
     }
 
-    fun setupDropDownWidget() {
+    private fun setupDropDownWidget() {
         viewModelScope.launch {
-            val places = repo.getPlaces()
-            val selected : Station = if (places.isEmpty()) {
+            repo.getPlaces()
+
+            val places = repo.places.value ?: listOf()
+            val selected : Station = if (places.isNullOrEmpty() == false) {
                 places.first()
             } else {
                 Station("", "")
             }
 
-            val newDropDownState = SearchWidgetDropDownState(false, places, selected)
+            val newDropDownState = SearchWidgetDropDownState(false, selected)
             dropDownMenuState = newDropDownState
         }
     }
 
     fun selectDropDownItem(item : Station) {
-        val newDropDownState = SearchWidgetDropDownState(false, dropDownMenuState.dropDownItems, item)
+        val newDropDownState = SearchWidgetDropDownState(false, item)
         dropDownMenuState = newDropDownState
     }
 
     fun expandDropDown() {
-        val newDropDownState = SearchWidgetDropDownState(true,
-            dropDownMenuState.dropDownItems, dropDownMenuState.selected)
+        val newDropDownState = SearchWidgetDropDownState(true, dropDownMenuState.selected)
         dropDownMenuState = newDropDownState
     }
 
     fun minimiseDropDown() {
-        val newDropDownState = SearchWidgetDropDownState(false,
-            dropDownMenuState.dropDownItems, dropDownMenuState.selected)
+        val newDropDownState = SearchWidgetDropDownState(false, dropDownMenuState.selected)
         dropDownMenuState = newDropDownState
     }
 
@@ -231,10 +237,31 @@ class SearchWidgetViewModel(context: Context) : ViewModel() {
 class SearchWidgetRepo(context: Context) {
     private val online = Online(context)
 
-    suspend fun getPlaces() : List<Station> {
-        val trainStation = online.getStation() ?: return listOf<Station>()
-
+    val places : LiveData<List<Station>> = Transformations.map(online.stationLiveData) { trainStation ->
         val stations = mutableListOf<Station>()
+        if (trainStation != null) {
+            if (trainStation.member != null) {
+
+                for (stationInfo in trainStation.member) {
+                    val name = stationInfo.name
+                    val code = stationInfo.station_code
+
+                    if (name != null && code != null) {
+                        val station = Station(name, code)
+                        stations.add(station)
+                    }
+                }
+            }
+        }
+
+        stations
+    }
+
+    suspend fun getPlaces() {
+        online.getStation()
+        //val trainStation = online.getStation() ?: return listOf<Station>()
+
+        /*val stations = mutableListOf<Station>()
         if (trainStation.member != null) {
 
             for (stationInfo in trainStation.member) {
@@ -248,6 +275,6 @@ class SearchWidgetRepo(context: Context) {
             }
         }
 
-        return stations
+        return stations*/
     }
 }

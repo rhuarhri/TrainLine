@@ -8,9 +8,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import com.rhuarhri.trainline.data.ServiceInfo
 import com.rhuarhri.trainline.data.Stop
 import com.rhuarhri.trainline.ui.theme.TrainLineTheme
 import com.rhuarhri.trainline.veiw_train_time_screen.ViewTrainTimeViewModel
@@ -46,9 +49,12 @@ class ViewTrainTime : ComponentActivity() {
                     },
                     content = {
                         Column {
-                            Time(viewTrainTimeViewModel.state.date)
-                            Route(viewTrainTimeViewModel.state.start, viewTrainTimeViewModel.state.end)
-                            Stops(stops = viewTrainTimeViewModel.state.stops)
+                            val serviceInfo by viewTrainTimeViewModel.serviceInfoState.observeAsState(
+                                initial = ServiceInfo("", "", "", listOf())
+                            )
+                            Time(serviceInfo.date)
+                            Route(serviceInfo.start, serviceInfo.end)
+                            Stops(stops = serviceInfo.stops)
                         }
                     },
                 )
@@ -58,14 +64,20 @@ class ViewTrainTime : ComponentActivity() {
 
     @Composable
     fun Time(date : String) {
-        Row(Modifier.height(100.dp).fillMaxWidth(), Arrangement.Center) {
+        Row(
+            Modifier
+                .height(100.dp)
+                .fillMaxWidth(), Arrangement.Center) {
             Text(date)
         }
     }
 
     @Composable
     fun Route(start : String, end : String) {
-        Column(Modifier.height(100.dp).fillMaxWidth()) {
+        Column(
+            Modifier
+                .height(100.dp)
+                .fillMaxWidth()) {
             Text("Route")
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 Text(start)
@@ -86,7 +98,10 @@ class ViewTrainTime : ComponentActivity() {
 
     @Composable
     fun Stop(departAt : String, stationName: String) {
-        Row(Modifier.height(60.dp).fillMaxWidth(), Arrangement.SpaceAround) {
+        Row(
+            Modifier
+                .height(60.dp)
+                .fillMaxWidth(), Arrangement.SpaceAround) {
             Text(departAt)
             Text(stationName)
         }

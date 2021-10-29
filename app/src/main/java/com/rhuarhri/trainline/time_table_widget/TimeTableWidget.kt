@@ -9,15 +9,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.rhuarhri.trainline.ViewTrainTime
 import com.rhuarhri.trainline.data.TimeTable
 import com.rhuarhri.trainline.online.Online
@@ -29,9 +28,10 @@ import kotlinx.coroutines.withContext
 class TimeTableWidget {
 
     @Composable
-    fun Widget(context : Context, state: TimeTableWidgetState) {
+    fun Widget(context : Context, viewModel : TimetableWidgetViewModel) {
+        val timeTable by viewModel.timeTableSate.observeAsState(initial = listOf())
         LazyColumn(Modifier.fillMaxSize(),) {
-            items(items = state.timeTable) { item ->
+            items(items = timeTable) { item ->
                 TimeTableItem(context = context, platform = item.platform, departAt = item.departAt,
                     start = item.start, destination = item.destination, trainId = item.trainId, date = item.date)
             }
@@ -44,7 +44,8 @@ class TimeTableWidget {
 
         Column(modifier = Modifier
             .height(100.dp)
-            .fillMaxWidth().clickable {
+            .fillMaxWidth()
+            .clickable {
                 val intent = Intent(context, ViewTrainTime::class.java)
                 intent.putExtra("trainId", trainId)
                 intent.putExtra("date", date)
@@ -69,9 +70,9 @@ class TimeTableWidget {
     }
 }
 
-class TimeTableWidgetState(val timeTable : List<TimeTable>) {
+/*class TimeTableWidgetState(val timeTable : List<TimeTable>) {
 
-}
+}*/
 
 class TimeTableWidgetViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     /*
@@ -85,25 +86,35 @@ class TimeTableWidgetViewModelFactory(private val context: Context) : ViewModelP
 
 class TimetableWidgetViewModel(context: Context) : ViewModel() {
 
-    var state by mutableStateOf(TimeTableWidgetState(listOf()))
+    //var state by mutableStateOf(TimeTableWidgetState(listOf()))
     private val repo = TimeTableWidgetRepo(context)
+
+    /*val timeTableState : LiveData<TimeTableWidgetState> = Transformations.map(repo.timeTableListLiveData) { timeTableList ->
+        TimeTableWidgetState(timeTableList)
+    }*/
+
+    val timeTableSate = repo.timeTableListLiveData
 
     fun search(stationName: String, date : String, time : String) {
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
+            repo.searchForTimeTable(stationName, date, time)
+        }
+
+        /*viewModelScope.launch(Dispatchers.IO) {
             val timeTable = repo.searchForTimeTable(stationName, date, time)
 
             println("got result is ${timeTable.size}")
-            /*
+            *//*
                I think the viewModelScope defaults to the main thread, and there
                is not any real benefit to running the coroutine on the IO thread
                however this work just fine
-            */
+            *//*
             withContext(Dispatchers.Main) {
                 val newState = TimeTableWidgetState(timeTable)
                 state = newState
             }
-        }
+        }*/
     }
 
 }
@@ -114,59 +125,66 @@ class TimeTableWidgetRepo(context: Context) {
 
     private val online = Online(context)
 
-    suspend fun searchForTimeTable(stationName: String = "SHF", date : String = "", time : String = "")
-    : List<TimeTable> {
-        val found = online.getTimeTable(stationName, date, time) ?: return listOf()
+    val timeTableListLiveData : LiveData<List<TimeTable>> =
+        Transformations.map(online.currentTimeTable) { found ->
 
-        val timeTable = mutableListOf<TimeTable>()
+            val timeTable = mutableListOf<TimeTable>()
 
-        val all = if (found.departures != null) {
-            if (found.departures.all != null) {
-                found.departures.all
-            } else {
-                listOf<All>()
+            if (found != null) {
+                val all = if (found.departures != null) {
+                    if (found.departures.all != null) {
+                        found.departures.all
+                    } else {
+                        listOf<All>()
+                    }
+                } else {
+                    listOf<All>()
+                }
+
+                for (item in all) {
+                    var platform = item.platform
+                    val departAt = item.aimed_departure_time
+                    val start = item.origin_name
+                    val destination = item.destination_name
+
+                    val trainId = item.train_uid ?: ""
+                    val trainDate = found.date ?: ""
+
+                    /*
+                I think because the places.json file / functionality of the transport api is still a
+                working progress.
+                See
+                https://developer.transportapi.com/docs?raml=https://transportapi.com/v3/raml/transportapi.raml##uk_places_json
+                maybe causing the platform variable to be null
+                Why? because the app gets a list of train stations from the places.json file.
+                The code of the train station is used to find the time table of the train station, which
+                contains a null value for the platform.
+                Another possibility is that a train station with a null value platform means that it has
+                only one platform.
+                either way if the platform value is null replace with NA
+                */
+
+                    if (platform == null) {
+                        platform = "NA"
+                    }
+
+                    if (departAt != null && start != null && destination != null) {
+                        /*
+                    removing all null data and getting only the most useful data
+                    */
+                        val timeTableItem = TimeTable(
+                            platform = platform, departAt = departAt, start = start,
+                            destination = destination, trainId = trainId, date = trainDate
+                        )
+                        timeTable.add(timeTableItem)
+                    }
+                }
             }
-        } else {
-            listOf<All>()
-        }
 
-        for (item in all) {
-            var platform = item.platform
-            val departAt = item.aimed_departure_time
-            val start = item.origin_name
-            val destination = item.destination_name
+        timeTable
+    }
 
-            val trainId = item.train_uid ?: ""
-            val trainDate = found.date ?: ""
-
-            /*
-            I think because the places.json file / functionality of the transport api is still a
-            working progress.
-            See
-            https://developer.transportapi.com/docs?raml=https://transportapi.com/v3/raml/transportapi.raml##uk_places_json
-            maybe causing the platform variable to be null
-            Why? because the app gets a list of train stations from the places.json file.
-            The code of the train station is used to find the time table of the train station, which
-            contains a null value for the platform.
-            Another possibility is that a train station with a null value platform means that it has
-            only one platform.
-            either way if the platform value is null replace with NA
-             */
-
-            if (platform == null) {
-                platform = "NA"
-            }
-
-            if (departAt != null && start != null && destination != null) {
-                /*
-                removing all null data and getting only the most useful data
-                 */
-                val timeTableItem = TimeTable(platform = platform, departAt = departAt, start = start,
-                    destination = destination, trainId = trainId, date = trainDate)
-                timeTable.add(timeTableItem)
-            }
-        }
-
-        return timeTable
+    suspend fun searchForTimeTable(stationName: String = "SHF", date : String = "", time : String = "") {
+        online.getTimeTable(stationName, date, time)
     }
 }

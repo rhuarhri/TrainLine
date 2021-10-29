@@ -3,6 +3,7 @@ package com.rhuarhri.trainline.online
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import androidx.lifecycle.MutableLiveData
 import com.rhuarhri.trainline.online.time_table_data.TimeTable
 import com.rhuarhri.trainline.online.train_service_data.Service
 import com.rhuarhri.trainline.online.train_station_location_data.TrainStation
@@ -31,9 +32,13 @@ class Online(private val context: Context) {
             .build()
     }
 
-    suspend fun getTimeTable(stationName: String = "SHF", date : String = "", time : String = "") : TimeTable? {
+    val currentTimeTable : MutableLiveData<TimeTable?> by lazy {
+        MutableLiveData<TimeTable?>()
+    }
+
+    suspend fun getTimeTable(stationName: String = "SHF", date : String = "", time : String = "") {
         //val url = "" + BASE + "train/station/" + stationName + "/" + date + "/" + time + "/"
-        return try {
+        val foundTimeTable : TimeTable? = try {
             val retrofitInterface = setupRetrofit().create(OnlineInterface::class.java)
             val response = retrofitInterface.getTimeTable(stationName,date,time).awaitResponse()
             if (response.isSuccessful == true) {
@@ -44,29 +49,40 @@ class Online(private val context: Context) {
         } catch (e : Exception) {
             null
         }
+
+        currentTimeTable.value = foundTimeTable
     }
 
-    suspend fun getServiceInfo(trainId: String, date : String) : Service? {
-        if (trainId.isBlank() && date.isBlank()) {
-            return null
-        }
+    val serviceInfoLiveData : MutableLiveData<Service?> by lazy {
+        MutableLiveData<Service?>()
+    }
+    suspend fun getServiceInfo(trainId: String, date : String) {
+        val service : Service? = if (trainId.isBlank() && date.isBlank()) {
+            null
+        } else {
 
-        //val url = "$BASE/train/service/train_uid:$trainId/$date/"
-        return try {
-            val retrofitInterface = setupRetrofit().create(OnlineInterface::class.java)
-            val response = retrofitInterface.getServiceInfo(trainId, date).awaitResponse()
-            if (response.isSuccessful == true) {
-                response.body()
-            } else {
+            //val url = "$BASE/train/service/train_uid:$trainId/$date/"
+            try {
+                val retrofitInterface = setupRetrofit().create(OnlineInterface::class.java)
+                val response = retrofitInterface.getServiceInfo(trainId, date).awaitResponse()
+                if (response.isSuccessful == true) {
+                    response.body()
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
                 null
             }
-        } catch (e : Exception) {
-            null
         }
+
+        serviceInfoLiveData.value = service
     }
 
-    suspend fun getStation() : TrainStation? {
-        return try {
+    val stationLiveData : MutableLiveData<TrainStation?> by lazy {
+        MutableLiveData<TrainStation?>()
+    }
+    suspend fun getStation() {
+        val station : TrainStation? = try {
         val retrofitInterface = setupRetrofit().create(OnlineInterface::class.java)
             val response = retrofitInterface.getPlace().awaitResponse()
             if (response.isSuccessful == true) {
@@ -77,6 +93,8 @@ class Online(private val context: Context) {
         } catch (e : Exception) {
             null
         }
+
+        stationLiveData.value = station
     }
 
     companion object {

@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import com.rhuarhri.trainline.online.Online
 import com.rhuarhri.trainline.search_widget.SearchWidget
@@ -17,6 +18,8 @@ import com.rhuarhri.trainline.time_table_widget.TimeTableWidget
 import com.rhuarhri.trainline.time_table_widget.TimeTableWidgetViewModelFactory
 import com.rhuarhri.trainline.time_table_widget.TimetableWidgetViewModel
 import com.rhuarhri.trainline.ui.theme.TrainLineTheme
+import androidx.compose.runtime.livedata.observeAsState
+
 
 class MainActivity : ComponentActivity() {
 
@@ -29,7 +32,7 @@ class MainActivity : ComponentActivity() {
 
         searchWidgetViewModel = ViewModelProvider(this, SearchWidgetViewModelFactory(this.applicationContext))
             .get(SearchWidgetViewModel::class.java)
-        searchWidgetViewModel.setupDropDownWidget()
+        //searchWidgetViewModel.setupDropDownWidget()
 
         timetableWidgetViewModel = ViewModelProvider(this, TimeTableWidgetViewModelFactory(this.applicationContext))
             .get(TimetableWidgetViewModel::class.java)
@@ -52,7 +55,7 @@ class MainActivity : ComponentActivity() {
                     },
                 )},
                     content = {
-                        TimeTableWidget().Widget(this, state = timetableWidgetViewModel.state)
+                        TimeTableWidget().Widget(this, viewModel = timetableWidgetViewModel)
                     },
                 floatingActionButton = {
                     FloatingActionButton(onClick = {
