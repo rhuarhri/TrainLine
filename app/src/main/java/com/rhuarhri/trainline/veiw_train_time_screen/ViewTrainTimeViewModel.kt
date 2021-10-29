@@ -10,22 +10,27 @@ import com.rhuarhri.trainline.data.Stop
 import com.rhuarhri.trainline.online.Online
 import kotlinx.coroutines.launch
 
-class ViewTrainTimeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+class ViewTrainTimeViewModelFactory(private val context: Context, private val trainId: String?,
+                                    private val date : String?) : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return ViewTrainTimeViewModel(context) as T
+        return ViewTrainTimeViewModel(context, trainId, date) as T
     }
 
 }
 
-class ViewTrainTimeViewModel(context: Context) : ViewModel() {
+class ViewTrainTimeViewModel(context: Context, trainId: String?, date: String?) : ViewModel() {
 
     private val repo = ViewTrainTimeRepo(context)
     //var state by mutableStateOf(ServiceInfo("", "", "", listOf()))
 
     val serviceInfoState = repo.serviceInfoLiveData
 
-    fun setup(trainId : String, date : String) {
-        if (trainId.isNotBlank() && date.isNotBlank()) {
+    init {
+        setup(trainId, date)
+    }
+
+    private fun setup(trainId : String?, date : String?) {
+        if (trainId != null && trainId.isNotBlank() && date != null && date.isNotBlank()) {
             viewModelScope.launch {
                 repo.getServiceInfo(trainId, date)
             }

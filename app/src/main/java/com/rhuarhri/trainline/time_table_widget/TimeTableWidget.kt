@@ -10,8 +10,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,9 +19,7 @@ import com.rhuarhri.trainline.ViewTrainTime
 import com.rhuarhri.trainline.data.TimeTable
 import com.rhuarhri.trainline.online.Online
 import com.rhuarhri.trainline.online.time_table_data.All
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class TimeTableWidget {
 
@@ -70,10 +66,6 @@ class TimeTableWidget {
     }
 }
 
-/*class TimeTableWidgetState(val timeTable : List<TimeTable>) {
-
-}*/
-
 class TimeTableWidgetViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     /*
     This is a factory class. It is used to deal with the complexity of creating a view model.
@@ -86,12 +78,7 @@ class TimeTableWidgetViewModelFactory(private val context: Context) : ViewModelP
 
 class TimetableWidgetViewModel(context: Context) : ViewModel() {
 
-    //var state by mutableStateOf(TimeTableWidgetState(listOf()))
     private val repo = TimeTableWidgetRepo(context)
-
-    /*val timeTableState : LiveData<TimeTableWidgetState> = Transformations.map(repo.timeTableListLiveData) { timeTableList ->
-        TimeTableWidgetState(timeTableList)
-    }*/
 
     val timeTableSate = repo.timeTableListLiveData
 

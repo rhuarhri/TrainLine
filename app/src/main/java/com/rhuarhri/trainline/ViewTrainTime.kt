@@ -29,11 +29,9 @@ class ViewTrainTime : ComponentActivity() {
         val trainId = intent.getStringExtra("trainId")
         val date = intent.getStringExtra("date")
 
-        viewTrainTimeViewModel = ViewModelProvider(this, ViewTrainTimeViewModelFactory(this.applicationContext))
+        viewTrainTimeViewModel = ViewModelProvider(this,
+            ViewTrainTimeViewModelFactory(this.applicationContext, trainId, date))
             .get(ViewTrainTimeViewModel::class.java)
-        if (trainId != null && date != null) {
-            viewTrainTimeViewModel.setup(trainId, date)
-        }
 
         setContent {
             TrainLineTheme {

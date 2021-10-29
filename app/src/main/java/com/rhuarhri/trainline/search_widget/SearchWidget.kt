@@ -176,11 +176,6 @@ class SearchWidgetViewModel(context: Context) : ViewModel() {
     to add the most up to date versions of the information the app / widget needs
      */
 
-    /*fun selectStation(name: String) {
-        val newState = SearchWidgetState(name, state.date, state.time,)
-        state = newState
-    }*/
-
     fun selectDate(day : Int, month: Int, year : Int) {
         val newDatePickerState = SearchWidgetDatePickerState(day, month, year)
         datePickerState = newDatePickerState
@@ -259,22 +254,5 @@ class SearchWidgetRepo(context: Context) {
 
     suspend fun getPlaces() {
         online.getStation()
-        //val trainStation = online.getStation() ?: return listOf<Station>()
-
-        /*val stations = mutableListOf<Station>()
-        if (trainStation.member != null) {
-
-            for (stationInfo in trainStation.member) {
-                val name = stationInfo.name
-                val code = stationInfo.station_code
-
-                if (name != null && code != null) {
-                    val station = Station(name, code)
-                    stations.add(station)
-                }
-            }
-        }
-
-        return stations*/
     }
 }
